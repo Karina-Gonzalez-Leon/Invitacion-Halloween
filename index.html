@@ -1092,6 +1092,21 @@ const WHATSAPP = '522227719506';                         // 52 = México + núme
 const DIRECCION = 'Salón Chely, Gustavo Díaz Ordaz 5214, Miguel Hidalgo, 72308 Heroica Puebla de Zaragoza, Pue.';
 const AUDIO_SRC = 'cancion.mp3';                         // tu canción (ponla junto a este archivo)
 const FOTOS = Array.from({ length: 11 }, (_, i) => `fotos/foto${i + 1}.jpg`);
+// Texto de cada polaroid, en el mismo orden que las fotos (máx. ~20 letras).
+// Deja '' para que esa foto quede sin texto.
+const TEXTOS_FOTOS = [
+  'La novia cosida',        // foto1
+  'Noche en la plaza',      // foto2
+  'Noche en el zócalo',     // foto3
+  'Tiffany en miniatura',   // foto4
+  '¿Flotamos juntos?',      // foto5
+  'Octubre 2017',           // foto6
+  'Cabeza de calabaza',     // foto7
+  'La calabacita',          // foto8
+  'Cosecha de calabazas',   // foto9
+  'Ciencia y travesuras',   // foto10
+  'Un par de diablillos',   // foto11
+];
 
 const $ = (id) => document.getElementById(id);
 
@@ -1473,8 +1488,11 @@ FOTOS.forEach((src, i) => {
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'polaroid';
-  b.setAttribute('aria-label', `Ver foto ${i + 1}`);
-  b.innerHTML = `<span class="ph"><img src="${src}" alt="Foto ${i + 1} de fiestas anteriores" loading="lazy"></span><span class="cap">Foto ${i + 1}</span>`;
+  const texto = TEXTOS_FOTOS[i] || '';
+  b.setAttribute('aria-label', texto ? `Ver foto: ${texto}` : `Ver foto ${i + 1}`);
+  const alt = texto || `Foto ${i + 1} de fiestas anteriores`;
+  b.innerHTML = `<span class="ph"><img src="${src}" alt="${alt}" loading="lazy"></span>` +
+                (texto ? `<span class="cap">${texto}</span>` : '');
   const img = b.querySelector('img');
   img.addEventListener('error', () => {           // si aún no existe la foto, muestra el espacio
     const ph = b.querySelector('.ph');
