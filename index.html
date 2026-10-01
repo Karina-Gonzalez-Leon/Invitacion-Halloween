@@ -22,7 +22,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎃%3C/text%3E%3C/svg%3E">
 <style>
-  /* Ajustes base para que se vea igual que en la vista de Claude */
+  /* Ajustes base */
   html { -webkit-text-size-adjust: 100%; }
   body { margin: 0; }
   img { max-width: 100%; }
@@ -43,13 +43,11 @@
       (busca AUDIO_SRC en el script). Mientras no exista, suena una
       melodía de Halloween generada por el propio navegador.
     • Las fotos: ponlas en una carpeta "fotos/" como foto1.jpg … foto11.jpg
-      (busca FOTOS en el script).
-
-  Cuando la publiques en Netlify o GitHub Pages, copia estas etiquetas
-  dentro de <head> para que WhatsApp muestre una vista previa bonita:
-    <meta property="og:title" content="¡Fiesta de Halloween!">
-    <meta property="og:description" content="Viernes 30 de octubre · 6:00 pm · Salón Chely">
-    <meta property="og:image" content="https://TU-SITIO/portada.jpg">
+      (busca FOTOS en el script). Usa ".jpg" en minúsculas: Netlify
+      distingue mayúsculas y un ".JPG" no carga.
+    • Fecha, lugar y teléfono: en CONFIGURACIÓN al inicio del script.
+      La fecha y el lugar también aparecen escritos en las etiquetas
+      og: de arriba y en los textos de la portada.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -107,6 +105,7 @@
     overflow-x: hidden;
   }
   body.locked { overflow: hidden; height: 100dvh; }
+  body.sin-scroll { overflow: hidden; }   /* visor abierto: conserva la posición */
 
   /* ---------- Capas de ambiente: cielo, niebla y murciélagos ---------- */
   .sky, .fog, .bats, .ghost { position: fixed; inset: 0; pointer-events: none; }
@@ -577,8 +576,8 @@
   .polaroid:focus-visible { outline: 3px solid var(--slime); outline-offset: 4px; }
   .hint { font-size: .9rem; color: var(--mist); }
 
-  .lightbox { position: fixed; inset: 0; z-index: 70; background: rgba(8,4,12,.92); display: grid; place-items: center; padding: 20px; }
-  .lightbox img { max-height: 70dvh; border: 8px solid var(--bone); border-radius: 4px; touch-action: pan-y; user-select: none; }
+  .lightbox { position: fixed; inset: 0; z-index: 70; background: rgba(8,4,12,.92); display: grid; place-items: center; padding: 20px; touch-action: pan-y; }
+  .lightbox img { max-height: 70dvh; border: 8px solid var(--bone); border-radius: 4px; user-select: none; }
   .lightbox #lightbox-close { position: absolute; top: calc(14px + env(safe-area-inset-top, 0px)); right: 14px; }
   .lb-nav {
     position: absolute; top: 50%; transform: translateY(-50%);
@@ -669,6 +668,7 @@
     background: var(--stone); color: var(--bone); font: 600 1.3rem var(--font-body);
   }
   .stepper button:focus-visible { outline: 2px solid var(--slime); }
+  .stepper button:disabled { opacity: .4; cursor: default; }
   .stepper output { font-size: 1.3rem; font-weight: 600; font-variant-numeric: tabular-nums; }
   .attending[hidden] { display: none !important; }
   .err { color: #ff9b8a; font-size: .95rem; min-height: 1.2em; }
@@ -1031,6 +1031,7 @@
     <div class="btn-row">
       <a class="btn solid" id="maps" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><use href="#i-pin"/></svg>Google Maps</a>
       <a class="btn" id="waze" target="_blank" rel="noopener">Waze</a>
+      <a class="btn" id="calendar" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><use href="#i-cal"/></svg>Agregar a mi calendario</a>
     </div>
   </section>
 
@@ -1064,7 +1065,7 @@
       </div>
       <p class="err" id="err" role="alert"></p>
       <a class="btn green" id="send" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><use href="#i-wa"/></svg>Confirmar por WhatsApp</a>
-      <p class="phone">Se abrirá WhatsApp con tu mensaje listo. Si no abre, escribe al <b>222 771 9506</b>.</p>
+      <p class="phone">Se abrirá WhatsApp con tu mensaje listo. Si no abre, escribe al <b id="phone"></b>.</p>
     </form>
   </section>
 
@@ -1094,7 +1095,7 @@
   </footer>
 </main>
 
-<div class="lightbox" id="lightbox" hidden>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Foto ampliada" hidden>
   <img id="lightbox-img" alt="">
   <button class="lb-nav lb-prev" id="lightbox-prev" type="button" aria-label="Foto anterior">‹</button>
   <button class="lb-nav lb-next" id="lightbox-next" type="button" aria-label="Foto siguiente">›</button>
@@ -1107,6 +1108,7 @@
    CONFIGURACIÓN — cambia aquí tus datos
    ================================================================ */
 const EVENTO = new Date('2026-10-30T18:00:00-06:00');   // viernes 30 oct, 6 pm (hora de Puebla)
+const DURACION_HORAS = 4;                                // para el calendario (6 a 10 pm)
 const WHATSAPP = '522227719506';                         // 52 = México + número a 10 dígitos
 const DIRECCION = 'Salón Chely, Gustavo Díaz Ordaz 5214, Miguel Hidalgo, 72308 Heroica Puebla de Zaragoza, Pue.';
 const AUDIO_SRC = 'cancion.mp3';                         // tu canción (ponla junto a este archivo)
@@ -1136,9 +1138,13 @@ const FONDO = 'noche';
 document.documentElement.dataset.fondo = FONDO;
 
 /* ---------- Imagen de portada ---------- */
-const IMAGEN_PORTADA = 'portada.png';
+const IMAGEN_PORTADA = 'portada.webp';            // ligera (32 KB)
+const IMAGEN_PORTADA_RESPALDO = 'portada.png';    // por si el navegador no abre .webp
 $('hero-img').src = IMAGEN_PORTADA;
-$('hero-img').addEventListener('error', () => { $('hero-img').hidden = true; $('hero-ph').hidden = false; });
+$('hero-img').addEventListener('error', () => {
+  if (!$('hero-img').src.endsWith(IMAGEN_PORTADA_RESPALDO)) { $('hero-img').src = IMAGEN_PORTADA_RESPALDO; return; }
+  $('hero-img').hidden = true; $('hero-ph').hidden = false;
+});
 
 /* ---------- Texto que se escribe solo ----------
    Se parte en letras para poder animarlas una por una. */
@@ -1188,7 +1194,10 @@ const params = new URLSearchParams(location.search);
 const invitado = params.get('invitado');
 const pases = parseInt(params.get('pases'), 10);
 if (invitado) {
-  $('greet').textContent = `¡${invitado}, estás invitado!`;
+  // "Familia …" va en plural; cualquier otro nombre, con un saludo sin género
+  $('greet').textContent = /^familia\b/i.test(invitado.trim())
+    ? `¡${invitado}, están invitados!`
+    : `¡${invitado}, te esperamos!`;
   $('rsvp-name').value = invitado;
 }
 if (pases > 0) {
@@ -1401,6 +1410,7 @@ function openDoor() {
     startMusic();
     $('sound').hidden = false;
     $('ghost').classList.add('on');
+    ghostFollow();
     hauntLead();
   }, 2100);
 }
@@ -1476,8 +1486,11 @@ function tick() {
     return;
   }
   const s = Math.floor(diff / 1000);
-  $('cd-d').textContent = Math.floor(s / 86400);
-  $('cd-h').textContent = String(Math.floor(s / 3600) % 24).padStart(2, '0');
+  const dias = Math.floor(s / 86400), horas = Math.floor(s / 3600) % 24;
+  $('cd-d').textContent = dias;
+  $('cd-h').textContent = String(horas).padStart(2, '0');
+  $('cd-d').nextElementSibling.textContent = dias === 1 ? 'día' : 'días';
+  $('cd-h').nextElementSibling.textContent = horas === 1 ? 'hora' : 'horas';
   $('cd-m').textContent = String(Math.floor(s / 60) % 60).padStart(2, '0');
   $('cd-s').textContent = String(s % 60).padStart(2, '0');
   setTimeout(tick, 1000);
@@ -1485,9 +1498,10 @@ function tick() {
 tick();
 
 /* ================================================================
-   FANTASMA QUE SIGUE EL DEDO
+   FANTASMA QUE SIGUE EL DEDO (arranca al abrir la puerta)
    ================================================================ */
-(function ghostFollow() {
+function ghostFollow() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const g = $('ghost');
   let x = innerWidth * 0.8, y = innerHeight * 0.3, tx = x, ty = y;
   addEventListener('pointermove', (e) => { tx = e.clientX + 18; ty = e.clientY - 60; }, { passive: true });
@@ -1497,7 +1511,7 @@ tick();
     g.style.transform = `translate(${x - 23}px, ${y}px) rotate(${(tx - x) * 0.05}deg)`;
     requestAnimationFrame(loop);
   })();
-})();
+}
 
 /* ================================================================
    GALERÍA (11 fotos)
@@ -1523,6 +1537,8 @@ FOTOS.forEach((src, i) => {
     if (b.dataset.empty) return;
     mostrarFoto(i);
     $('lightbox').hidden = false;
+    document.body.classList.add('sin-scroll');  // la página no se desplaza detrás
+    $('lightbox-next').focus();
   });
   strip.appendChild(b);
 });
@@ -1548,24 +1564,31 @@ function mostrarFoto(i) {
   [vecina(i, 1), vecina(i, -1)].forEach((j) => { new Image().src = FOTOS[j]; });   // precarga
 }
 function cambiarFoto(paso) { mostrarFoto(vecina(fotoActual, paso)); }
-function cerrarVisor() { $('lightbox').hidden = true; }
+function cerrarVisor() {
+  $('lightbox').hidden = true;
+  document.body.classList.remove('sin-scroll');
+  strip.children[fotoActual].focus({ preventScroll: true });   // el foco vuelve a la foto vista
+}
 $('lightbox-prev').addEventListener('click', () => cambiarFoto(-1));
 $('lightbox-next').addEventListener('click', () => cambiarFoto(1));
 $('lightbox-close').addEventListener('click', cerrarVisor);
-$('lightbox').addEventListener('click', (e) => { if (e.target.id === 'lightbox') cerrarVisor(); });
+$('lightbox').addEventListener('click', (e) => {
+  if (deslizo) { deslizo = false; return; }   // un deslizamiento no cuenta como toque para cerrar
+  if (e.target.id === 'lightbox') cerrarVisor();
+});
 addEventListener('keydown', (e) => {
   if ($('lightbox').hidden) return;
   if (e.key === 'ArrowLeft') cambiarFoto(-1);
   else if (e.key === 'ArrowRight') cambiarFoto(1);
   else if (e.key === 'Escape') cerrarVisor();
 });
-let toqueX = null;
-$('lightbox').addEventListener('pointerdown', (e) => { toqueX = e.clientX; });
+let toqueX = null, deslizo = false;
+$('lightbox').addEventListener('pointerdown', (e) => { toqueX = e.clientX; deslizo = false; });
 $('lightbox').addEventListener('pointerup', (e) => {
   if (toqueX === null) return;
   const dx = e.clientX - toqueX;
   toqueX = null;
-  if (Math.abs(dx) > 50) cambiarFoto(dx < 0 ? 1 : -1);
+  if (Math.abs(dx) > 50) { deslizo = true; cambiarFoto(dx < 0 ? 1 : -1); }
 });
 
 /* ================================================================
@@ -1616,16 +1639,55 @@ $('pumpkin').addEventListener('click', () => {
 $('maps').href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(DIRECCION);
 $('waze').href = 'https://waze.com/ul?q=' + encodeURIComponent(DIRECCION) + '&navigate=yes';
 
+/* ---------- Agregar al calendario ----------
+   iPhone/iPad: descarga un archivo .ics (lo abre Calendario).
+   Android y computadora: abre Google Calendar con el evento listo. */
+const FIN = new Date(EVENTO.getTime() + DURACION_HORAS * 3600000);
+const TITULO_EVENTO = 'Fiesta de Halloween 🎃';
+const DETALLE_EVENTO = '¡Ven disfrazado! Concurso de disfraces, juegos y sustos. ' + location.origin + location.pathname;
+const utc = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');   // 20261031T000000Z
+const esApple = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+if (esApple) {
+  const ics = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Halloween Chely//ES', 'BEGIN:VEVENT',
+    `UID:halloween-${utc(EVENTO)}@halloween-chely`, `DTSTAMP:${utc(new Date())}`,
+    `DTSTART:${utc(EVENTO)}`, `DTEND:${utc(FIN)}`,
+    `SUMMARY:${TITULO_EVENTO}`,
+    `LOCATION:${DIRECCION.replace(/,/g, '\\,')}`,
+    `DESCRIPTION:${DETALLE_EVENTO.replace(/,/g, '\\,')}`,
+    'END:VEVENT', 'END:VCALENDAR'
+  ].join('\r\n');
+  $('calendar').href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+  $('calendar').download = 'fiesta-halloween.ics';
+  $('calendar').removeAttribute('target');
+} else {
+  $('calendar').href = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+    '&text=' + encodeURIComponent(TITULO_EVENTO) +
+    '&dates=' + utc(EVENTO) + '/' + utc(FIN) +
+    '&location=' + encodeURIComponent(DIRECCION) +
+    '&details=' + encodeURIComponent(DETALLE_EVENTO);
+}
+
 /* ================================================================
    CONFIRMACIÓN POR WHATSAPP
    El enlace se actualiza cada vez que cambias algo del formulario.
    ================================================================ */
+$('phone').textContent = WHATSAPP.slice(-10).replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+
 const count = { ad: 1, ni: 0 };
+const LIMITE = pases > 0 ? pases : 20;            // con ?pases=N no se puede pasar de N en total
+function updateSteppers() {
+  const lleno = count.ad + count.ni >= LIMITE;
+  document.querySelectorAll('.stepper button[data-d="1"]').forEach((b) => { b.disabled = lleno; });
+}
 document.querySelectorAll('.stepper button').forEach((b) => {
   b.addEventListener('click', () => {
     const k = b.dataset.t;
-    count[k] = Math.max(k === 'ad' ? 0 : 0, Math.min(20, count[k] + Number(b.dataset.d)));
+    const otro = k === 'ad' ? count.ni : count.ad;
+    count[k] = Math.max(0, Math.min(LIMITE - otro, count[k] + Number(b.dataset.d)));
     $(k).textContent = count[k];
+    updateSteppers();
     updateLink();
   });
 });
@@ -1637,13 +1699,17 @@ function updateLink() {
   let msg;
   if (yes) {
     msg = `¡Hola! 🎃 Confirmo mi asistencia a la Fiesta de Halloween del viernes 30 de octubre en Salón Chely.\n` +
-          `Nombre: ${name}\nAdultos: ${count.ad}\nNiños: ${count.ni}`;
+          `Nombre: ${name}\nAdultos: ${count.ad}\nNiños: ${count.ni}` +
+          (pases > 0 ? `\nPases reservados: ${pases}` : '');
   } else {
     msg = `¡Hola! Soy ${name}. Muchas gracias por la invitación a la Fiesta de Halloween, pero esta vez no podré asistir. ¡Que se diviertan!`;
   }
   $('send').href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
   $('send').setAttribute('aria-disabled', name ? 'false' : 'true');
-  if (name) $('err').textContent = '';
+  if (name) {
+    const lleno = yes && pases > 0 && count.ad + count.ni >= LIMITE;
+    $('err').textContent = lleno ? `Tienes ${pases} ${pases === 1 ? 'lugar reservado' : 'lugares reservados'}.` : '';
+  }
 }
 ['input', 'change'].forEach((ev) => $('rsvp').addEventListener(ev, updateLink));
 $('rsvp').addEventListener('submit', (e) => e.preventDefault());
@@ -1657,6 +1723,7 @@ $('send').addEventListener('click', (e) => {
     $('err').textContent = 'Indica cuántos adultos y niños asistirán.';
   }
 });
+updateSteppers();
 updateLink();
 </script>
 </body>
