@@ -352,6 +352,7 @@
     grid-template-columns: minmax(0, 1fr);   /* nunca más ancho que la pantalla */
   }
   section { display: grid; gap: 16px; min-width: 0; }
+  section > * { min-width: 0; }   /* sin esto la tira de fotos ensancha la página en celular */
   main > * { min-width: 0; }
   h2 {
     margin: 0; font-family: var(--font-display); font-weight: 400;
