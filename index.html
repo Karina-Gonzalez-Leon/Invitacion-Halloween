@@ -664,12 +664,15 @@
   .finale {
     position: relative; overflow: hidden;
     margin-inline: -18px; padding: 70px 18px 90px;
-    display: grid; justify-items: center; text-align: center;
-    background: radial-gradient(ellipse at 50% 55%, rgba(120,0,20,.28), transparent 65%);
+    display: grid; justify-items: center; align-content: center; text-align: center;
+    min-height: clamp(520px, 150vw, 760px);
+    background:
+      radial-gradient(ellipse at 50% 55%, rgba(120,0,20,.28), transparent 65%),
+      linear-gradient(rgba(10,8,14,.35), rgba(10,8,14,.35)),
+      url("fondo-final.jpg") center / cover no-repeat;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 90px);
+            mask-image: linear-gradient(180deg, transparent 0, #000 90px);
   }
-  .finale .web { width: 130px; top: 0; }
-  .finale .web.left { left: 0; }
-  .finale .web.right { right: 0; }
   .dread { position: relative; z-index: 2; margin: 0; display: grid; gap: 4px; font-weight: 400; font-family: var(--font-drip); }
   .dread-1 { font-size: clamp(1.9rem, 9vw, 2.6rem); color: var(--bone); letter-spacing: .03em; text-shadow: 0 0 16px rgba(243,233,212,.35); }
   .dread-2 {
@@ -1050,10 +1053,8 @@
     </form>
   </section>
 
-  <!-- Cierre: telarañas, ojos en la oscuridad, sangre escurriendo y arañas -->
+  <!-- Cierre: imagen de fondo, ojos en la oscuridad, sangre escurriendo y arañas -->
   <footer class="finale">
-    <svg class="web left" viewBox="0 0 120 120" aria-hidden="true"><use href="#i-web"/></svg>
-    <svg class="web right" viewBox="0 0 120 120" aria-hidden="true"><use href="#i-web"/></svg>
     <div class="peers" aria-hidden="true">
       <span class="peer" style="--x:8%;  --y:18%; --d:0s"><i></i><i></i></span>
       <span class="peer" style="--x:78%; --y:10%; --d:1.6s"><i></i><i></i></span>
