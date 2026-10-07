@@ -35,4 +35,4 @@ python3 -m http.server 8000   # then open http://localhost:8000/?invitado=Famili
 
 ## Assets
 
-`cancion.mp3`, `portada.webp` (hero, 32 KB) with `portada.png` as fallback, `fondo-final.jpg` (background of the closing "Te esperamos… si te atreves" footer), `vista-previa.jpg` (OG preview), `fotos/foto1..11`. `FOTOS` builds paths as `fotos/foto${n}.jpg` — keep new photos lowercase `.jpg`; Netlify is case-sensitive, so `.JPG` files 404 and show placeholders. Resize new photos before adding them (e.g. `mogrify -auto-orient -resize '1200x1200>' -quality 80 -strip`); guests open the page on mobile data.
+`cancion.mp3`, `portada.webp` (hero, 32 KB) with `portada.png` as fallback, `fondo-final.jpg` (background of the closing "Te esperamos… si te atreves" footer), `vista-previa.jpg` (OG preview), `fotos/foto1..12`. `FOTOS` builds paths as `fotos/foto${n}.jpg` — keep new photos lowercase `.jpg`; Netlify is case-sensitive, so `.JPG` files 404 and show placeholders. Resize new photos before adding them (e.g. `mogrify -auto-orient -resize '1200x1200>' -quality 80 -strip`); guests open the page on mobile data.
