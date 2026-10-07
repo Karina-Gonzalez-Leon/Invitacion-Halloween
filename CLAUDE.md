@@ -29,6 +29,8 @@ python3 -m http.server 8000   # then open http://localhost:8000/?invitado=Famili
 - **Personalized links:** `?invitado=<nombre>&pases=<n>` fills the greeting ("Familia …" → plural "están invitados", otherwise gender-neutral "te esperamos"), pre-fills the RSVP name, and shows reserved seats. With `pases`, adults + children are capped at that number (`LIMITE`) and the WhatsApp message includes it; without it the cap is 20.
 - **RSVP:** no backend — the form builds a `wa.me/<WHATSAPP>?text=...` link that is regenerated on every input change.
 - **Gallery lightbox:** prev/next buttons, ←/→/Esc, and swipe (`deslizo` flag stops a swipe from also closing it). While open, `body.sin-scroll` blocks page scroll — don't reuse `body.locked`, which also sets `height: 100dvh` and would jump the page to the top.
+- **Guía de scroll:** tras abrir la puerta aparecen una barra de progreso fija arriba (`#progreso`) y una flecha "Desliza" (`#scroll-hint`) que se oculta al pasar de 80px de scroll; ambas se actualizan en un solo listener `scroll` (`actualizarScroll()`).
+- **Chips de la portada:** fecha/hora son enlaces al calendario (copian el `href` de `#calendar`) y el lugar abre Google Maps (copia el de `#maps`).
 - **Calendar button:** Google Calendar link on Android/desktop; on iPhone/iPad it downloads a generated `.ics` (blob URL).
 
 ## Assets
